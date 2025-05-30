@@ -3,38 +3,41 @@
 #include "../include/ui_manager.h"
 #include "raylib.h"
 
-static const float startMenuLogoSize = 450.0f;
+static Rectangle startMenuLogoBounds;
+static imageButton playButton;
+static imageButton optionsButton;
+static imageButton quitButton;
 
-static const Rectangle startMenuLogoBounds = {
-    (float)globalSettings.screenWidth / 2.0f - (startMenuLogoSize / 2.0f),
-    (float)globalSettings.screenHeight / 2.0f - startMenuLogoSize,
-    startMenuLogoSize, startMenuLogoSize};
+void initScreenManager() {
+  // StartMenu Variable Declarations
+  float screenW = (float)globalSettings.screenWidth;
+  float screenH = (float)globalSettings.screenHeight;
 
-static const Vector2 startMenuButtonSize = {360.0f, 120.0f};
+  const float logoSize = 450.0f;
+  startMenuLogoBounds = {screenW / 2.0f - logoSize / 2.0f,
+                         screenH / 2.0f - logoSize, logoSize, logoSize};
 
-static const imageButton playButton = {
-    {(float)globalSettings.screenWidth / 2.0f - (startMenuButtonSize.x / 2.0f),
-     (float)globalSettings.screenHeight / 2.0f, startMenuButtonSize.x,
-     startMenuButtonSize.y},
-    "PLAY",
-    55,
-    (Color){255, 198, 0, 255}};
+  const Vector2 buttonSize = {360.0f, 120.0f};
 
-static const imageButton optionsButton = {
-    {(float)globalSettings.screenWidth / 2.0f - (startMenuButtonSize.x / 2.0f),
-     (float)globalSettings.screenHeight / 2.0f + 160.f, startMenuButtonSize.x,
-     startMenuButtonSize.y},
-    "OPTIONS",
-    55,
-    (Color){0, 146, 255, 255}};
+  playButton = {{screenW / 2.0f - buttonSize.x / 2.0f, screenH / 2.0f,
+                 buttonSize.x, buttonSize.y},
+                "PLAY",
+                55,
+                (Color){255, 198, 0, 255}};
 
-static const imageButton quitButton = {
-    {(float)globalSettings.screenWidth / 2.0f - (startMenuButtonSize.x / 2.0f),
-     (float)globalSettings.screenHeight / 2.0f + 320.f, startMenuButtonSize.x,
-     startMenuButtonSize.y},
-    "QUIT",
-    55,
-    RED};
+  optionsButton = {{screenW / 2.0f - buttonSize.x / 2.0f,
+                    screenH / 2.0f + 160.f, buttonSize.x, buttonSize.y},
+                   "OPTIONS",
+                   55,
+                   (Color){0, 146, 255, 255}};
+
+  quitButton = {{screenW / 2.0f - buttonSize.x / 2.0f, screenH / 2.0f + 320.f,
+                 buttonSize.x, buttonSize.y},
+                "QUIT",
+                55,
+                RED};
+  //
+}
 
 void drawStartMenu() {
   ClearBackground((Color){58, 71, 80, 255});

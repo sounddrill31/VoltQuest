@@ -1,4 +1,5 @@
 #include "../include/window_manager.h"
+#include "../include/screen_manager.h"
 #include "../include/settings.h"
 #include <raylib.h>
 
@@ -22,6 +23,9 @@ void createWindow() {
   // Save the forced resolution
   globalSettings.screenWidth = forcedWidth;
   globalSettings.screenHeight = forcedHeight;
+
+  // initializes the screen Manager
+  initScreenManager();
 
   // Create a the game window
   InitWindow(globalSettings.screenWidth, globalSettings.screenHeight,
