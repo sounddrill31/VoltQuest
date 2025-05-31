@@ -15,4 +15,5 @@ void unloadUITextures();
 void drawImageButton(const imageButton &button);
 bool isImageButtonPressed(const imageButton &button);
 void drawLogo(Rectangle bounds);
+
 #endif

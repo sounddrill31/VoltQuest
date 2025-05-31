@@ -2,13 +2,19 @@
 #define SETTINGS_H
 
 struct settings {
-  int currentMonitor = 0;
-  int screenWidth = 1920;
-  int screenHeight = 1080;
-  int RefreshRate = 60;
-  bool fullscreen = false;
+  bool isGameRunning;
+  int currentMonitor;
+  int screenWidth;
+  int screenHeight;
+  int RefreshRate;
+  bool fullscreen;
 };
 
-inline settings globalSettings;
+inline settings globalSettings = {.isGameRunning = true,
+                                  .currentMonitor = 0,
+                                  .screenWidth = 1920,
+                                  .screenHeight = 1080,
+                                  .RefreshRate = 60,
+                                  .fullscreen = false};
 
 #endif
