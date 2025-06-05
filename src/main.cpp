@@ -6,14 +6,12 @@
 int main() {
   createWindow();
   initUIManager();
-  initScreenManager();
-
   while (globalSettings.isGameRunning) {
     BeginDrawing();
     drawCurrentScreen();
     EndDrawing();
   }
-  unloadUITextures();
+  unloadAllUITexture();
   CloseWindow();
   return 0;
 }

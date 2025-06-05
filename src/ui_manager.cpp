@@ -3,25 +3,29 @@
 #include "raylib.h"
 #include <cmath>
 
-static Texture2D logoTexture;
-static Texture2D buttonTexture;
-static float screenScale{1.0f};
-const int baseWidth{1920};
-const int baseHeight{1080};
+static float screenScale = 1.0f;
+const float baseWidth = 1920;
+const float baseHeight = 1080;
+static Texture2D textures[IMGCOUNT];
 
 void initUIManager() {
-  buttonTexture = LoadTexture("../assets/images/button.png");
-  logoTexture = LoadTexture("../assets/logos/VoltQuest.png");
+  textures[IMGLOGO] = LoadTexture("../assets/logos/VoltQuest.png");
+  textures[IMGBUTTON] = LoadTexture("../assets/images/button.png");
+  textures[IMGPANEL] = LoadTexture("../assets/images/panel.png");
 
   // Calculate scale of screen with respect to resolution
-  screenScale = fminf((float)globalSettings.screenWidth / baseWidth,
-                      (float)globalSettings.screenHeight / baseHeight);
+  screenScale =
+      fminf(static_cast<float>(globalSettings.screenWidth / baseWidth),
+            static_cast<float>(globalSettings.screenHeight / baseHeight));
 }
 
-void unloadUITextures() {
-  UnloadTexture(buttonTexture);
-  UnloadTexture(logoTexture);
+void unloadAllUITexture() {
+  for (int i = 0; i < IMGCOUNT; ++i) {
+    UnloadTexture(textures[i]);
+  }
 }
+
+void unloadUITexture(int IMG) { UnloadTexture(textures[IMG]); }
 
 // Note:The buttonTexture image is in 3:1 RATIO so use appropriate resolution
 void drawImageButton(const imageButton &button) {
@@ -29,20 +33,20 @@ void drawImageButton(const imageButton &button) {
       button.bounds.x * screenScale, button.bounds.y * screenScale,
       button.bounds.width * screenScale, button.bounds.height * screenScale};
 
-  DrawTexturePro(
-      buttonTexture,
-      {0, 0, (float)buttonTexture.width, (float)buttonTexture.height},
-      scaledBounds, {0, 0}, 0.0f, WHITE);
+  DrawTexturePro(textures[IMGBUTTON],
+                 {0, 0, static_cast<float>(textures[IMGBUTTON].width),
+                  static_cast<float>(textures[IMGBUTTON].height)},
+                 scaledBounds, {0, 0}, 0.0f, WHITE);
 
-  int scaledFontSize = (int)(button.fontSize * screenScale);
+  int scaledFontSize = static_cast<int>(button.fontSize * screenScale);
   int textWidth = MeasureText(button.text.c_str(), scaledFontSize);
 
   Vector2 textPos = {scaledBounds.x + (scaledBounds.width - textWidth) / 2.0f,
                      scaledBounds.y +
                          (scaledBounds.height - scaledFontSize) / 2.0f};
 
-  DrawText(button.text.c_str(), (int)textPos.x, (int)textPos.y, scaledFontSize,
-           button.textColor);
+  DrawText(button.text.c_str(), static_cast<int>(textPos.x),
+           static_cast<int>(textPos.y), scaledFontSize, button.textColor);
 }
 
 bool isImageButtonPressed(const imageButton &button) {
@@ -62,12 +66,13 @@ bool isImageButtonPressed(const imageButton &button) {
                        IsGestureDetected(GESTURE_TAP));
 }
 
-void drawLogo(Rectangle bounds) {
+// Draw Image function
+void drawImage(int IMG, Rectangle bounds) {
   Rectangle scaledBounds = {bounds.x * screenScale, bounds.y * screenScale,
                             bounds.width * screenScale,
                             bounds.height * screenScale};
-  DrawTexturePro(
-      logoTexture,
-      {0.0f, 0.0f, (float)logoTexture.width, (float)logoTexture.height},
-      scaledBounds, {0.0f, 0.0f}, 0.0f, WHITE);
+  DrawTexturePro(textures[IMG],
+                 {0.0f, 0.0f, static_cast<float>(textures[IMG].width),
+                  static_cast<float>(textures[IMG].height)},
+                 scaledBounds, {0.0f, 0.0f}, 0.0f, WHITE);
 }

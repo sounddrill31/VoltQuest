@@ -28,6 +28,8 @@ This includes (but is not limited to):
 
 ### Third-Party Assets
 
+- `assets/images/panel.png` — from [Kenney Assets](https://kenney.nl/assets), licensed under **CC0 (public domain)**
+
 - `assets/images/button.png` — from [Kenney Assets](https://kenney.nl/assets), licensed under **CC0 (public domain)**
 
 If you reuse third-party assets in your contributions, make sure they are under CC0, CC BY, CC BY-SA, MIT, or other permissive licenses, and provide attribution as needed.
