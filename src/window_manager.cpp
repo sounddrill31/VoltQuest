@@ -1,5 +1,5 @@
-#include "../include/window_manager.h"
-#include "../include/settings.h"
+#include "../include/window_manager.hpp"
+#include "../include/settings.hpp"
 #include <raylib.h>
 
 void createWindow() {

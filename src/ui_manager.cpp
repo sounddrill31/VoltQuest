@@ -1,5 +1,5 @@
-#include "../include/ui_manager.h"
-#include "../include/settings.h"
+#include "../include/ui_manager.hpp"
+#include "../include/settings.hpp"
 #include "raylib.h"
 #include <cmath>
 
@@ -24,8 +24,7 @@ void unloadAllUITexture() {
     UnloadTexture(textures[i]);
   }
 }
-
-void unloadUITexture(int IMG) { UnloadTexture(textures[IMG]); }
+void unloadUITexture(const int &IMG) { UnloadTexture(textures[IMG]); }
 
 // Note:The buttonTexture image is in 3:1 RATIO so use appropriate resolution
 void drawImageButton(const imageButton &button) {
@@ -37,6 +36,9 @@ void drawImageButton(const imageButton &button) {
                  {0, 0, static_cast<float>(textures[IMGBUTTON].width),
                   static_cast<float>(textures[IMGBUTTON].height)},
                  scaledBounds, {0, 0}, 0.0f, WHITE);
+  if (button.isfocused) {
+    DrawRectangleRoundedLines(scaledBounds, 0.5f, 3, SKYBLUE);
+  }
 
   int scaledFontSize = static_cast<int>(button.fontSize * screenScale);
   int textWidth = MeasureText(button.text.c_str(), scaledFontSize);
@@ -50,6 +52,7 @@ void drawImageButton(const imageButton &button) {
 }
 
 bool isImageButtonPressed(const imageButton &button) {
+  bool ispressed = false;
   Rectangle scaledBounds = {
       button.bounds.x * screenScale, button.bounds.y * screenScale,
       button.bounds.width * screenScale, button.bounds.height * screenScale};
@@ -62,12 +65,18 @@ bool isImageButtonPressed(const imageButton &button) {
     isHovered = CheckCollisionPointRec(inputPos, scaledBounds);
   }
 
-  return isHovered && (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
-                       IsGestureDetected(GESTURE_TAP));
+  if (isHovered && (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
+                    IsGestureDetected(GESTURE_TAP))) {
+    ispressed = true;
+  } else if (button.isfocused &&
+             (IsKeyDown(KEY_ENTER) || IsKeyDown(KEY_KP_ENTER))) {
+    ispressed = true;
+  }
+  return ispressed;
 }
 
 // Draw Image function
-void drawImage(int IMG, Rectangle bounds) {
+void drawImage(const int &IMG, const Rectangle &bounds) {
   Rectangle scaledBounds = {bounds.x * screenScale, bounds.y * screenScale,
                             bounds.width * screenScale,
                             bounds.height * screenScale};
@@ -75,4 +84,8 @@ void drawImage(int IMG, Rectangle bounds) {
                  {0.0f, 0.0f, static_cast<float>(textures[IMG].width),
                   static_cast<float>(textures[IMG].height)},
                  scaledBounds, {0.0f, 0.0f}, 0.0f, WHITE);
+}
+
+void updateKeyboardNavigation(imageButton *buttons, int count) {
+  static int buttonFocused = 0;
 }

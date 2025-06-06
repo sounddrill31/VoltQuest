@@ -14,12 +14,14 @@ struct imageButton {
   std::string text;
   int fontSize;
   Color textColor;
+  bool isfocused;
 };
 void initUIManager();
 void unloadAllUITexture();
-void unloadUITexture(int IMG);
+void unloadUITexture(const int &IMG);
 void drawImageButton(const imageButton &button);
 bool isImageButtonPressed(const imageButton &button);
-void drawImage(int IMG, Rectangle bounds);
+void drawImage(const int &IMG, const Rectangle &bounds);
+void updateKeyboardNavigation(imageButton *buttons, int count);
 
 #endif
