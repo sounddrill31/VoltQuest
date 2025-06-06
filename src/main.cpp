@@ -1,7 +1,7 @@
-#include "../include/screen_manager.h"
-#include "../include/settings.h"
-#include "../include/ui_manager.h"
-#include "../include/window_manager.h"
+#include "../include/screen_manager.hpp"
+#include "../include/settings.hpp"
+#include "../include/ui_manager.hpp"
+#include "../include/window_manager.hpp"
 #include "raylib.h"
 int main() {
   createWindow();
