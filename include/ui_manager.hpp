@@ -22,6 +22,6 @@ void unloadUITexture(const int &IMG);
 void drawImageButton(const imageButton &button);
 bool isImageButtonPressed(const imageButton &button);
 void drawImage(const int &IMG, const Rectangle &bounds);
-void updateKeyboardNavigation(imageButton *buttons, int count);
+void updateKeyboardNavigation(imageButton **buttons, int count);
 
 #endif

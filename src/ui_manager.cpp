@@ -7,6 +7,7 @@ static float screenScale = 1.0f;
 const float baseWidth = 1920;
 const float baseHeight = 1080;
 static Texture2D textures[IMGCOUNT];
+static int buttonFocusedIndex = 0;
 
 void initUIManager() {
   textures[IMGLOGO] = LoadTexture("../assets/logos/VoltQuest.png");
@@ -32,13 +33,18 @@ void drawImageButton(const imageButton &button) {
       button.bounds.x * screenScale, button.bounds.y * screenScale,
       button.bounds.width * screenScale, button.bounds.height * screenScale};
 
+  if (button.isfocused) {
+    DrawRectangleRounded(Rectangle{(button.bounds.x - 5) * screenScale,
+                                   (button.bounds.y - 5) * screenScale,
+                                   (button.bounds.width + 10) * screenScale,
+                                   (button.bounds.height + 10) * screenScale},
+                         0.15f, 3, SKYBLUE);
+  }
+
   DrawTexturePro(textures[IMGBUTTON],
                  {0, 0, static_cast<float>(textures[IMGBUTTON].width),
                   static_cast<float>(textures[IMGBUTTON].height)},
                  scaledBounds, {0, 0}, 0.0f, WHITE);
-  if (button.isfocused) {
-    DrawRectangleRoundedLines(scaledBounds, 0.5f, 3, SKYBLUE);
-  }
 
   int scaledFontSize = static_cast<int>(button.fontSize * screenScale);
   int textWidth = MeasureText(button.text.c_str(), scaledFontSize);
@@ -71,6 +77,7 @@ bool isImageButtonPressed(const imageButton &button) {
   } else if (button.isfocused &&
              (IsKeyDown(KEY_ENTER) || IsKeyDown(KEY_KP_ENTER))) {
     ispressed = true;
+    buttonFocusedIndex = 0;
   }
   return ispressed;
 }
@@ -86,6 +93,16 @@ void drawImage(const int &IMG, const Rectangle &bounds) {
                  scaledBounds, {0.0f, 0.0f}, 0.0f, WHITE);
 }
 
-void updateKeyboardNavigation(imageButton *buttons, int count) {
-  static int buttonFocused = 0;
+void updateKeyboardNavigation(imageButton **buttons, int count) {
+  if ((IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) && buttonFocusedIndex > 0) {
+    --buttonFocusedIndex;
+  }
+
+  else if ((IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) &&
+           buttonFocusedIndex < count - 1) {
+    ++buttonFocusedIndex;
+  }
+  for (int i = 0; i < count; ++i) {
+    buttons[i]->isfocused = (i == buttonFocusedIndex);
+  }
 }

@@ -36,6 +36,8 @@ static imageButton quitButton = {
     "QUIT",
     55,
     RED};
+
+imageButton *buttonsArray[] = {&playButton, &optionsButton, &quitButton};
 } // namespace startMenu
 
 namespace optionsMenu {
@@ -64,6 +66,7 @@ void drawCurrentScreen() {
   switch (currentScreen) {
   case SCREEN::START_MENU: {
     drawStartMenu();
+    updateKeyboardNavigation(startMenu::buttonsArray, 3);
     if (isImageButtonPressed(startMenu::playButton)) {
       currentScreen = SCREEN::CHAPTER_MENU;
     }
