@@ -5,6 +5,7 @@
 #include "raylib.h"
 int main() {
   createWindow();
+  initBasePath();
   initUIManager();
   while (globalSettings.isGameRunning) {
     BeginDrawing();

@@ -1,6 +1,10 @@
 #include "../include/window_manager.hpp"
 #include "../include/settings.hpp"
+#include <filesystem>
 #include <raylib.h>
+#include <string>
+
+static std::string basePath;
 
 void createWindow() {
   // Create a temporary window to retrieve monitor info, then close it
@@ -28,4 +32,10 @@ void createWindow() {
              "VoltQuest");
   SetExitKey(0); // Disables Escape key from CloseWindow
   SetTargetFPS(globalSettings.RefreshRate);
+}
+
+void initBasePath() { basePath = std::filesystem::current_path().string(); }
+
+std::string getResourcePath(const std::string &relativePath) {
+  return basePath + "/resources/" + relativePath;
 }

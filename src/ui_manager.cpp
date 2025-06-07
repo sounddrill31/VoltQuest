@@ -1,7 +1,9 @@
 #include "../include/ui_manager.hpp"
 #include "../include/settings.hpp"
+#include "../include/window_manager.hpp"
 #include "raylib.h"
 #include <cmath>
+#include <string>
 
 static float screenScale = 1.0f;
 const float baseWidth = 1920;
@@ -10,9 +12,12 @@ static Texture2D textures[IMGCOUNT];
 static int buttonFocusedIndex = 0;
 
 void initUIManager() {
-  textures[IMGLOGO] = LoadTexture("../assets/logos/VoltQuest.png");
-  textures[IMGBUTTON] = LoadTexture("../assets/images/button.png");
-  textures[IMGPANEL] = LoadTexture("../assets/images/panel.png");
+  textures[IMGLOGO] =
+      LoadTexture(getResourcePath("assets/logos/VoltQuest.png").c_str());
+  textures[IMGBUTTON] =
+      LoadTexture(getResourcePath("assets/images/button.png").c_str());
+  textures[IMGPANEL] =
+      LoadTexture(getResourcePath("assets/images/panel.png").c_str());
 
   // Calculate scale of screen with respect to resolution
   screenScale =
@@ -34,11 +39,11 @@ void drawImageButton(const imageButton &button) {
       button.bounds.width * screenScale, button.bounds.height * screenScale};
 
   if (button.isfocused) {
-    DrawRectangleRounded(Rectangle{(button.bounds.x - 5) * screenScale,
-                                   (button.bounds.y - 5) * screenScale,
-                                   (button.bounds.width + 10) * screenScale,
-                                   (button.bounds.height + 10) * screenScale},
-                         0.15f, 3, SKYBLUE);
+    DrawRectangleRoundedLinesEx(Rectangle{(button.bounds.x) * screenScale,
+                                          (button.bounds.y) * screenScale,
+                                          (button.bounds.width) * screenScale,
+                                          (button.bounds.height) * screenScale},
+                                0.18f, 5, 5.0f, SKYBLUE);
   }
 
   DrawTexturePro(textures[IMGBUTTON],
