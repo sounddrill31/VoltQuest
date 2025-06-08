@@ -6,7 +6,8 @@
 int main() {
   createWindow();
   initBasePath();
-  initUIManager();
+  loadAllUITextures();
+  calculateScreenScale();
   while (globalSettings.isGameRunning) {
     BeginDrawing();
     drawCurrentScreen();

@@ -2,27 +2,28 @@
 #include "../include/settings.hpp"
 #include "../include/window_manager.hpp"
 #include "raylib.h"
-#include <cmath>
 #include <string>
 
-static float screenScale = 1.0f;
-const float baseWidth = 1920;
-const float baseHeight = 1080;
+static float screenScaleX = 1.0f;
+static float screenScaleY = 1.0f;
+const float baseWidth = 1920.0f;
+const float baseHeight = 1080.0f;
 static Texture2D textures[IMGCOUNT];
 static int buttonFocusedIndex = 0;
 
-void initUIManager() {
+void loadAllUITextures() {
   textures[IMGLOGO] =
       LoadTexture(getResourcePath("assets/logos/VoltQuest.png").c_str());
   textures[IMGBUTTON] =
       LoadTexture(getResourcePath("assets/images/button.png").c_str());
   textures[IMGPANEL] =
       LoadTexture(getResourcePath("assets/images/panel.png").c_str());
+}
 
+void calculateScreenScale() {
   // Calculate scale of screen with respect to resolution
-  screenScale =
-      fminf(static_cast<float>(globalSettings.screenWidth / baseWidth),
-            static_cast<float>(globalSettings.screenHeight / baseHeight));
+  screenScaleX = static_cast<float>(globalSettings.screenWidth / baseWidth);
+  screenScaleY = static_cast<float>(globalSettings.screenHeight / baseHeight);
 }
 
 void unloadAllUITexture() {
@@ -35,15 +36,16 @@ void unloadUITexture(const int &IMG) { UnloadTexture(textures[IMG]); }
 // Note:The buttonTexture image is in 3:1 RATIO so use appropriate resolution
 void drawImageButton(const imageButton &button) {
   Rectangle scaledBounds = {
-      button.bounds.x * screenScale, button.bounds.y * screenScale,
-      button.bounds.width * screenScale, button.bounds.height * screenScale};
+      button.bounds.x * screenScaleX, button.bounds.y * screenScaleY,
+      button.bounds.width * screenScaleX, button.bounds.height * screenScaleY};
 
   if (button.isfocused) {
-    DrawRectangleRoundedLinesEx(Rectangle{(button.bounds.x) * screenScale,
-                                          (button.bounds.y) * screenScale,
-                                          (button.bounds.width) * screenScale,
-                                          (button.bounds.height) * screenScale},
-                                0.18f, 5, 5.0f, SKYBLUE);
+    DrawRectangleRoundedLinesEx(
+        Rectangle{(button.bounds.x) * screenScaleX,
+                  (button.bounds.y) * screenScaleY,
+                  (button.bounds.width) * screenScaleX,
+                  (button.bounds.height) * screenScaleY},
+        0.18f, 6, 5.0f * ((screenScaleX + screenScaleY) / 2.0f), SKYBLUE);
   }
 
   DrawTexturePro(textures[IMGBUTTON],
@@ -51,7 +53,7 @@ void drawImageButton(const imageButton &button) {
                   static_cast<float>(textures[IMGBUTTON].height)},
                  scaledBounds, {0, 0}, 0.0f, WHITE);
 
-  int scaledFontSize = static_cast<int>(button.fontSize * screenScale);
+  int scaledFontSize = static_cast<int>(button.fontSize * screenScaleY);
   int textWidth = MeasureText(button.text.c_str(), scaledFontSize);
 
   Vector2 textPos = {scaledBounds.x + (scaledBounds.width - textWidth) / 2.0f,
@@ -65,8 +67,8 @@ void drawImageButton(const imageButton &button) {
 bool isImageButtonPressed(const imageButton &button) {
   bool ispressed = false;
   Rectangle scaledBounds = {
-      button.bounds.x * screenScale, button.bounds.y * screenScale,
-      button.bounds.width * screenScale, button.bounds.height * screenScale};
+      button.bounds.x * screenScaleX, button.bounds.y * screenScaleY,
+      button.bounds.width * screenScaleX, button.bounds.height * screenScaleY};
 
   Vector2 inputPos = GetMousePosition();
   bool isHovered = CheckCollisionPointRec(inputPos, scaledBounds);
@@ -89,9 +91,9 @@ bool isImageButtonPressed(const imageButton &button) {
 
 // Draw Image function
 void drawImage(const int &IMG, const Rectangle &bounds) {
-  Rectangle scaledBounds = {bounds.x * screenScale, bounds.y * screenScale,
-                            bounds.width * screenScale,
-                            bounds.height * screenScale};
+  Rectangle scaledBounds = {bounds.x * screenScaleX, bounds.y * screenScaleY,
+                            bounds.width * screenScaleX,
+                            bounds.height * screenScaleY};
   DrawTexturePro(textures[IMG],
                  {0.0f, 0.0f, static_cast<float>(textures[IMG].width),
                   static_cast<float>(textures[IMG].height)},

@@ -20,21 +20,21 @@ static imageButton playButton = {
     {screenW / 2.0f - startMenu::buttonSize.x / 2.0f, screenH / 2.0f,
      startMenu::buttonSize.x, startMenu::buttonSize.y},
     "PLAY",
-    55,
+    50,
     Color{255, 198, 0, 255}};
 
 static imageButton optionsButton = {
     {screenW / 2.0f - startMenu::buttonSize.x / 2.0f, screenH / 2.0f + 160.f,
      startMenu::buttonSize.x, startMenu::buttonSize.y},
     "OPTIONS",
-    55,
+    50,
     Color{0, 146, 255, 255}};
 
 static imageButton quitButton = {
     {screenW / 2.0f - startMenu::buttonSize.x / 2.0f, screenH / 2.0f + 320.f,
      startMenu::buttonSize.x, startMenu::buttonSize.y},
     "QUIT",
-    55,
+    50,
     RED};
 
 imageButton *buttonsArray[] = {&playButton, &optionsButton, &quitButton};

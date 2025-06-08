@@ -16,7 +16,8 @@ struct imageButton {
   Color textColor;
   bool isfocused;
 };
-void initUIManager();
+void loadAllUITextures();
+void calculateScreenScale();
 void unloadAllUITexture();
 void unloadUITexture(const int &IMG);
 void drawImageButton(const imageButton &button);
