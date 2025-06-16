@@ -2,6 +2,7 @@
 #include "../include/settings.hpp"
 #include "../include/ui_manager.hpp"
 #include "../include/window_manager.hpp"
+#include "../include/path_utils.hpp"
 #include "raylib.h"
 int main() {
   createWindow();
