@@ -1,17 +1,24 @@
 #include "../include/ui_manager.hpp"
-#include "../include/settings.hpp"
-#include "../include/window_manager.hpp"
 #include "../include/path_utils.hpp"
+#include "../include/settings.hpp"
 #include "raylib.h"
+#include <cmath>
 #include <string>
 
-static float screenScaleX = 1.0f;
-static float screenScaleY = 1.0f;
 const float baseWidth = 1920.0f;
 const float baseHeight = 1080.0f;
+static float screenScaleX = 1.0f;
+static float screenScaleY = 1.0f;
 static Texture2D textures[IMGCOUNT];
-static int buttonFocusedIndex = 0;
 
+// Utils
+void calculateScreenScale() {
+  // Calculate scale of screen with respect to resolution
+  screenScaleX = static_cast<float>(globalSettings.screenWidth / baseWidth);
+  screenScaleY = static_cast<float>(globalSettings.screenHeight / baseHeight);
+}
+
+// Manage Textures
 void loadAllUITextures() {
   textures[IMGLOGO] =
       LoadTexture(getResourcePath("assets/logos/VoltQuest.png").c_str());
@@ -21,10 +28,8 @@ void loadAllUITextures() {
       LoadTexture(getResourcePath("assets/images/panel.png").c_str());
 }
 
-void calculateScreenScale() {
-  // Calculate scale of screen with respect to resolution
-  screenScaleX = static_cast<float>(globalSettings.screenWidth / baseWidth);
-  screenScaleY = static_cast<float>(globalSettings.screenHeight / baseHeight);
+void loadUITexture(int IMG_ID, const std::string &texturePath) {
+  textures[IMG_ID] = LoadTexture(getResourcePath(texturePath).c_str());
 }
 
 void unloadAllUITexture() {
@@ -32,21 +37,19 @@ void unloadAllUITexture() {
     UnloadTexture(textures[i]);
   }
 }
-void unloadUITexture(const int &IMG) { UnloadTexture(textures[IMG]); }
 
-// Note:The buttonTexture image is in 3:1 RATIO so use appropriate resolution
+void unloadUITexture(int IMG_ID) { UnloadTexture(textures[IMG_ID]); }
+
+// Draw Functions
 void drawImageButton(const imageButton &button) {
   Rectangle scaledBounds = {
       button.bounds.x * screenScaleX, button.bounds.y * screenScaleY,
       button.bounds.width * screenScaleX, button.bounds.height * screenScaleY};
 
   if (button.isfocused) {
-    DrawRectangleRoundedLinesEx(
-        Rectangle{(button.bounds.x) * screenScaleX,
-                  (button.bounds.y) * screenScaleY,
-                  (button.bounds.width) * screenScaleX,
-                  (button.bounds.height) * screenScaleY},
-        0.18f, 6, 5.0f * ((screenScaleX + screenScaleY) / 2.0f), SKYBLUE);
+    DrawRectangleRoundedLinesEx(scaledBounds, 0.18f, 6,
+                                5.0f * ((screenScaleX + screenScaleY) / 2.0f),
+                                SKYBLUE);
   }
 
   DrawTexturePro(textures[IMGBUTTON],
@@ -54,7 +57,8 @@ void drawImageButton(const imageButton &button) {
                   static_cast<float>(textures[IMGBUTTON].height)},
                  scaledBounds, {0, 0}, 0.0f, WHITE);
 
-  int scaledFontSize = static_cast<int>(button.fontSize * screenScaleY);
+  int scaledFontSize =
+      static_cast<int>(button.fontSize * fminf(screenScaleX, screenScaleY));
   int textWidth = MeasureText(button.text.c_str(), scaledFontSize);
 
   Vector2 textPos = {scaledBounds.x + (scaledBounds.width - textWidth) / 2.0f,
@@ -65,6 +69,29 @@ void drawImageButton(const imageButton &button) {
            static_cast<int>(textPos.y), scaledFontSize, button.textColor);
 }
 
+void drawImage(int IMG_ID, const Rectangle &bounds) {
+  Rectangle scaledBounds = {bounds.x * screenScaleX, bounds.y * screenScaleY,
+                            bounds.width * screenScaleX,
+                            bounds.height * screenScaleY};
+  DrawTexturePro(textures[IMG_ID],
+                 {0.0f, 0.0f, static_cast<float>(textures[IMG_ID].width),
+                  static_cast<float>(textures[IMG_ID].height)},
+                 scaledBounds, {0.0f, 0.0f}, 0.0f, WHITE);
+}
+
+void drawUIText(int fontSize, const Vector2 &textPos, const std::string &text,
+                const Color &textColor) {
+  int scaledFontSize =
+      static_cast<int>(fontSize * fminf(screenScaleX, screenScaleY));
+  int textWidth = MeasureText(text.c_str(), scaledFontSize);
+
+  DrawText(text.c_str(),
+           static_cast<int>((textPos.x * screenScaleX - textWidth / 2.0f)),
+           static_cast<int>(textPos.y * screenScaleY), scaledFontSize,
+           textColor);
+}
+
+// Input Functions
 bool isImageButtonPressed(const imageButton &button) {
   bool ispressed = false;
   Rectangle scaledBounds = {
@@ -85,32 +112,21 @@ bool isImageButtonPressed(const imageButton &button) {
   } else if (button.isfocused &&
              (IsKeyDown(KEY_ENTER) || IsKeyDown(KEY_KP_ENTER))) {
     ispressed = true;
-    buttonFocusedIndex = 0;
   }
   return ispressed;
 }
 
-// Draw Image function
-void drawImage(const int &IMG, const Rectangle &bounds) {
-  Rectangle scaledBounds = {bounds.x * screenScaleX, bounds.y * screenScaleY,
-                            bounds.width * screenScaleX,
-                            bounds.height * screenScaleY};
-  DrawTexturePro(textures[IMG],
-                 {0.0f, 0.0f, static_cast<float>(textures[IMG].width),
-                  static_cast<float>(textures[IMG].height)},
-                 scaledBounds, {0.0f, 0.0f}, 0.0f, WHITE);
-}
-
-void updateKeyboardNavigation(imageButton **buttons, int count) {
-  if ((IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) && buttonFocusedIndex > 0) {
-    --buttonFocusedIndex;
+void updateKeyboardNavigation(int count, int &focusedButton,
+                              imageButton **buttons) {
+  if ((IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) && focusedButton > 0) {
+    --focusedButton;
   }
 
   else if ((IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) &&
-           buttonFocusedIndex < count - 1) {
-    ++buttonFocusedIndex;
+           focusedButton < count - 1) {
+    ++focusedButton;
   }
   for (int i = 0; i < count; ++i) {
-    buttons[i]->isfocused = (i == buttonFocusedIndex);
+    buttons[i]->isfocused = (i == focusedButton);
   }
 }

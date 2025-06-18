@@ -9,20 +9,32 @@ constexpr int IMGPANEL = 2;
 constexpr int IMGCOUNT = 3;
 
 struct imageButton {
-  // The button Texture image is in 3:1 RATIO so use resolution in similar ratio
   Rectangle bounds;
   std::string text;
   int fontSize;
   Color textColor;
   bool isfocused;
 };
-void loadAllUITextures();
+
+// Utils
 void calculateScreenScale();
+
+// Manage Textures
+
+void loadAllUITextures();
+void loadUITexture(int IMG_ID, const std::string &texturePath);
 void unloadAllUITexture();
-void unloadUITexture(const int &IMG);
+void unloadUITexture(int IMG_ID);
+
+// Draw Functions
 void drawImageButton(const imageButton &button);
+void drawImage(int IMG_ID, const Rectangle &bounds);
+void drawUIText(int fontSize, const Vector2 &textPos, const std::string &text,
+                const Color &textColor);
+
+// Input Functions
 bool isImageButtonPressed(const imageButton &button);
-void drawImage(const int &IMG, const Rectangle &bounds);
-void updateKeyboardNavigation(imageButton **buttons, int count);
+void updateKeyboardNavigation(int count, int &focusedButton,
+                              imageButton **buttons);
 
 #endif
