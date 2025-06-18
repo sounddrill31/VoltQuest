@@ -4,6 +4,8 @@
 struct settings {
   bool isGameRunning;
   int currentMonitor;
+  int monitorWidth;
+  int monitorHeight;
   int screenWidth;
   int screenHeight;
   int RefreshRate;
