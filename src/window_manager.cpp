@@ -2,13 +2,15 @@
 #include "../include/settings.hpp"
 #include "raylib.h"
 
-
 void createWindow() {
   // Create a temporary window to retrieve monitor info, then close it
   InitWindow(1, 1, "temp");
   globalSettings.currentMonitor = GetCurrentMonitor();
-  globalSettings.screenWidth = GetMonitorWidth(globalSettings.currentMonitor);
-  globalSettings.screenHeight = GetMonitorHeight(globalSettings.currentMonitor);
+  globalSettings.monitorWidth = GetMonitorWidth(globalSettings.currentMonitor);
+  globalSettings.monitorHeight =
+      GetMonitorHeight(globalSettings.currentMonitor);
+  globalSettings.screenWidth = globalSettings.monitorWidth;
+  globalSettings.screenHeight = globalSettings.monitorHeight;
   CloseWindow();
 
   // Create a the game window
@@ -17,5 +19,3 @@ void createWindow() {
   SetExitKey(0); // Disables Escape key from CloseWindow
   SetTargetFPS(globalSettings.RefreshRate);
 }
-
-
