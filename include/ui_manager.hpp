@@ -4,11 +4,9 @@
 #include <string>
 
 constexpr int IMGLOGO = 0;
-constexpr int IMGBUTTON = 1;
-constexpr int IMGPANEL = 2;
-constexpr int IMGCOUNT = 3;
+constexpr int IMGCOUNT = 1;
 
-struct imageButton {
+struct UIButton {
   Rectangle bounds;
   std::string text;
   int fontSize;
@@ -27,14 +25,16 @@ void unloadAllUITexture();
 void unloadUITexture(int IMG_ID);
 
 // Draw Functions
-void drawImageButton(const imageButton &button);
+void drawUIRect(float outlineSize, const Rectangle &bounds);
+void drawUIButton(const UIButton &button);
 void drawImage(int IMG_ID, const Rectangle &bounds);
+void drawUIPanel(float outlineSize, const Rectangle &bounds);
 void drawUIText(int fontSize, const Vector2 &textPos, const std::string &text,
                 const Color &textColor);
 
 // Input Functions
-bool isImageButtonPressed(const imageButton &button);
+bool isUIButtonPressed(const UIButton &button);
 void updateKeyboardNavigation(int count, int &focusedButton,
-                              imageButton **buttons);
+                              UIButton **buttons);
 
 #endif

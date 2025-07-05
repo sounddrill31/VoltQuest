@@ -9,13 +9,28 @@ void createWindow() {
   globalSettings.monitorWidth = GetMonitorWidth(globalSettings.currentMonitor);
   globalSettings.monitorHeight =
       GetMonitorHeight(globalSettings.currentMonitor);
-  globalSettings.screenWidth = globalSettings.monitorWidth;
-  globalSettings.screenHeight = globalSettings.monitorHeight;
   CloseWindow();
+
+  if (overrideSettings()) {
+    globalSettings.screenWidth = globalSettings.monitorWidth;
+    globalSettings.screenHeight = globalSettings.monitorHeight;
+    globalSettings.refreshRate = 60;
+    globalSettings.fullscreen = true;
+    saveSettings();
+  }
+
+  if (globalSettings.fullscreen) {
+    globalSettings.screenWidth = globalSettings.monitorWidth;
+    globalSettings.screenHeight = globalSettings.monitorHeight;
+    SetConfigFlags(FLAG_FULLSCREEN_MODE);
+  } else {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+  }
 
   // Create a the game window
   InitWindow(globalSettings.screenWidth, globalSettings.screenHeight,
              "VoltQuest");
+
   SetExitKey(0); // Disables Escape key from CloseWindow
-  SetTargetFPS(globalSettings.RefreshRate);
+  SetTargetFPS(globalSettings.refreshRate);
 }

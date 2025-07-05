@@ -2,64 +2,103 @@
 #include "../include/settings.hpp"
 #include "../include/ui_manager.hpp"
 #include "raylib.h"
-
-const float screenW = 1920.0f;
-const float screenH = 1080.0f;
+#include <cmath>
 
 enum class SCREEN { START_MENU, OPTIONS_MENU, CHAPTER_MENU, LEVEL_MENU, GAME };
 SCREEN currentScreen = SCREEN::START_MENU;
 
+const float baseWidth = 1920.0f;
+const float baseHeight = 1080.0f;
+float screenScaleX = 1.0f;
+float screenScaleY = 1.0f;
+float safeScreenScale = 1.0f;
+
 namespace startMenu {
+float logoSize;
+Rectangle logoBounds;
+Vector2 buttonSize;
+Rectangle playButtonBounds;
+Rectangle optionsButtonBounds;
+Rectangle quitButtonBounds;
+
+UIButton playButton;
+UIButton optionsButton;
+UIButton quitButton;
+UIButton *buttonsArray[3] = {&playButton, &optionsButton, &quitButton};
+
 int focusedButton = 0;
-const float logoSize = 450.0f;
-static Vector2 buttonSize = {360.0f, 120.0f};
-static Rectangle logoBounds = {screenW / 2.0f - startMenu::logoSize / 2.0f,
-                               screenH / 2.0f - startMenu::logoSize,
-                               startMenu::logoSize, startMenu::logoSize};
-
-static imageButton playButton = {
-    {screenW / 2.0f - startMenu::buttonSize.x / 2.0f, screenH / 2.0f,
-     startMenu::buttonSize.x, startMenu::buttonSize.y},
-    "PLAY",
-    55,
-    Color{255, 198, 0, 255}};
-
-static imageButton optionsButton = {
-    {screenW / 2.0f - startMenu::buttonSize.x / 2.0f, screenH / 2.0f + 160.f,
-     startMenu::buttonSize.x, startMenu::buttonSize.y},
-    "OPTIONS",
-    55,
-    Color{0, 146, 255, 255}};
-
-static imageButton quitButton = {
-    {screenW / 2.0f - startMenu::buttonSize.x / 2.0f, screenH / 2.0f + 320.f,
-     startMenu::buttonSize.x, startMenu::buttonSize.y},
-    "QUIT",
-    55,
-    RED};
-
-imageButton *buttonsArray[] = {&playButton, &optionsButton, &quitButton};
 } // namespace startMenu
 
 namespace optionsMenu {
-static Vector2 panelSize = {1000.0f, 900.0f};
-static Rectangle panelBounds = {screenW / 2.0f - panelSize.x / 2.0f,
-                                screenH / 2.0f - panelSize.y / 2.0f,
-                                panelSize.x, panelSize.y};
-static Vector2 optionsTextPos = {screenW / 2.0f, 140.0f};
+Vector2 panelSize;
+Rectangle panelBounds;
+Vector2 optionsTextPos;
 } // namespace optionsMenu
+
+void updateLayout() {
+  screenScaleX = static_cast<float>(globalSettings.screenWidth) / baseWidth;
+  screenScaleY = static_cast<float>(globalSettings.screenHeight) / baseHeight;
+  safeScreenScale = (screenScaleX + screenScaleY) / 2.0f;
+  // ─── Start Menu ────────────────────────────────
+  {
+    startMenu::logoSize = 450.0f * safeScreenScale;
+    startMenu::buttonSize = {360.0f * safeScreenScale,
+                             120.0f * safeScreenScale};
+    startMenu::logoBounds = {
+        (baseWidth / 2.0f * screenScaleX) - (startMenu::logoSize / 2.0f),
+        (baseHeight / 2.0f * screenScaleY) - (startMenu::logoSize),
+        startMenu::logoSize, startMenu::logoSize};
+
+    startMenu::playButton = {
+        {(baseWidth / 2.0f * screenScaleX) - (startMenu::buttonSize.x / 2.0f),
+         (baseHeight / 2.0f * screenScaleY), startMenu::buttonSize.x,
+         startMenu::buttonSize.y},
+        "PLAY",
+        55,
+        Color{255, 198, 0, 255}};
+
+    startMenu::optionsButton = {
+        {(baseWidth / 2.0f * screenScaleX) - (startMenu::buttonSize.x / 2.0f),
+         (baseHeight / 2.0f * screenScaleY) + (160.f * screenScaleY),
+         startMenu::buttonSize.x, startMenu::buttonSize.y},
+        "OPTIONS",
+        55,
+        Color{0, 146, 255, 255}};
+
+    startMenu::quitButton = {
+        {(baseWidth / 2.0f * screenScaleX) - (startMenu::buttonSize.x / 2.0f),
+         (baseHeight / 2.0f * screenScaleY) + (320.f * screenScaleY),
+         startMenu::buttonSize.x, startMenu::buttonSize.y},
+        "QUIT",
+        55,
+        RED};
+  }
+
+  // ─── Options Menu ──────────────────────────────
+  {
+    optionsMenu::panelSize = {1000.0f * safeScreenScale,
+                              900.0f * safeScreenScale}; // Static panel size
+    optionsMenu::panelBounds = {
+        (baseWidth / 2.0f * screenScaleX) - (optionsMenu::panelSize.x / 2.0f),
+        (baseHeight / 2.0f * screenScaleY) - (optionsMenu::panelSize.y / 2.0f),
+        optionsMenu::panelSize.x, optionsMenu::panelSize.y};
+
+    optionsMenu::optionsTextPos = {baseWidth / 2.0f * screenScaleX,
+                                   baseHeight / 8.0f}; // Top text Y position
+  }
+}
 
 void drawStartMenu() {
   ClearBackground(Color{58, 71, 80, 255});
   drawImage(IMGLOGO, startMenu::logoBounds);
-  drawImageButton(startMenu::playButton);
-  drawImageButton(startMenu::optionsButton);
-  drawImageButton(startMenu::quitButton);
+  drawUIButton(startMenu::playButton);
+  drawUIButton(startMenu::optionsButton);
+  drawUIButton(startMenu::quitButton);
 }
 
 void drawOptionsMenu() {
   ClearBackground(Color{58, 71, 80, 255});
-  drawImage(IMGPANEL, optionsMenu::panelBounds);
+  drawUIPanel(20.0f, optionsMenu::panelBounds);
   drawUIText(80, optionsMenu::optionsTextPos, "OPTIONS",
              Color{0, 146, 255, 255});
 }
@@ -70,19 +109,16 @@ void drawCurrentScreen() {
     drawStartMenu();
     updateKeyboardNavigation(3, startMenu::focusedButton,
                              startMenu::buttonsArray);
-    if (isImageButtonPressed(startMenu::playButton)) {
+    if (isUIButtonPressed(startMenu::playButton)) {
       currentScreen = SCREEN::CHAPTER_MENU;
-    }
-
-    else if (isImageButtonPressed(startMenu::optionsButton)) {
+    } else if (isUIButtonPressed(startMenu::optionsButton)) {
       currentScreen = SCREEN::OPTIONS_MENU;
-    }
-
-    else if (isImageButtonPressed(startMenu::quitButton)) {
+    } else if (isUIButtonPressed(startMenu::quitButton)) {
       globalSettings.isGameRunning = false;
     }
     break;
   }
+
   case SCREEN::OPTIONS_MENU: {
     drawOptionsMenu();
     if (IsKeyDown(KEY_ESCAPE)) {
@@ -90,5 +126,8 @@ void drawCurrentScreen() {
     }
     break;
   }
+
+  default:
+    break;
   }
 }
