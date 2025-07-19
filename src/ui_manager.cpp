@@ -1,26 +1,17 @@
 #include "../include/ui_manager.hpp"
+#include "../include/game_objects/electronic_components/output/led.hpp"
+#include "../include/game_objects/electronic_components/power/battery.hpp"
+#include "../include/game_objects/electronic_components/wiring/wire.hpp"
 #include "../include/path_utils.hpp"
-#include "../include/settings.hpp"
+#include "../include/ui_utils.hpp"
 #include "raylib.h"
 #include <cmath>
+#include <memory>
 #include <string>
+#include <vector>
 
-const float baseWidth = 1920.0f;
-const float baseHeight = 1080.0f;
-
-static float screenScaleX = 1.0f;
-static float screenScaleY = 1.0f;
-static float safeScreenScale = 1.0f;
 static Texture2D textures[IMGCOUNT];
-
-// ─────────────────────────────────────────────────────
-// Utils
-// ─────────────────────────────────────────────────────
-void calculateScreenScale() {
-  screenScaleX = static_cast<float>(globalSettings.screenWidth) / baseWidth;
-  screenScaleY = static_cast<float>(globalSettings.screenHeight) / baseHeight;
-  safeScreenScale = (screenScaleX + screenScaleY) / 2.0f;
-}
+void resetLevel();
 
 // ─────────────────────────────────────────────────────
 // Manage Textures
@@ -47,14 +38,12 @@ void unloadUITexture(int IMG_ID) { UnloadTexture(textures[IMG_ID]); }
 // ─────────────────────────────────────────────────────
 void drawUIRect(float outlineSize, const Rectangle &bounds) {
   DrawRectangleRounded(bounds, 0.2f, 6, Color{151, 151, 165, 255});
-
   DrawRectangleRounded(
       Rectangle{bounds.x + (outlineSize * safeScreenScale) / 2.0f,
                 bounds.y + (outlineSize * safeScreenScale) / 2.0f,
                 bounds.width - outlineSize * safeScreenScale,
                 bounds.height - outlineSize * safeScreenScale},
       0.2f, 6, WHITE);
-
   DrawRectangleRounded(
       Rectangle{bounds.x + ((outlineSize * 2.0f) * safeScreenScale) / 2.0f,
                 bounds.y + ((outlineSize * 2.0f) * safeScreenScale) / 2.0f,
@@ -64,25 +53,14 @@ void drawUIRect(float outlineSize, const Rectangle &bounds) {
 }
 
 void drawUIButton(const UIButton &button) {
-
   if (button.isfocused) {
-    DrawRectangleRoundedLinesEx(
-        button.bounds, 0.2f, 6,
-        5.0f * safeScreenScale, // consistent outline thickness
-        SKYBLUE);
+    DrawRectangleRoundedLinesEx(button.bounds, 0.2f, 6, 5.0f * safeScreenScale,
+                                SKYBLUE);
   }
 
   drawUIRect(12.0f, button.bounds);
-
-  int scaledFontSize = static_cast<int>(button.fontSize * safeScreenScale);
-  int textWidth = MeasureText(button.text.c_str(), scaledFontSize);
-
-  Vector2 textPos = {button.bounds.x + (button.bounds.width - textWidth) / 2.0f,
-                     button.bounds.y +
-                         (button.bounds.height - scaledFontSize) / 2.0f};
-
-  DrawText(button.text.c_str(), static_cast<int>(textPos.x),
-           static_cast<int>(textPos.y), scaledFontSize, button.textColor);
+  drawUITextCentered(button.fontSize, button.bounds, button.text,
+                     button.textColor);
 }
 
 void drawUIPanel(float outlineSize, const Rectangle &bounds) {
@@ -90,27 +68,159 @@ void drawUIPanel(float outlineSize, const Rectangle &bounds) {
 }
 
 void drawImage(int IMG_ID, const Rectangle &bounds) {
-
   DrawTexturePro(textures[IMG_ID],
-                 {0.0f, 0.0f, static_cast<float>(textures[IMG_ID].width),
-                  static_cast<float>(textures[IMG_ID].height)},
+                 {0.0f, 0.0f, (float)textures[IMG_ID].width,
+                  (float)textures[IMG_ID].height},
                  bounds, {0.0f, 0.0f}, 0.0f, WHITE);
 }
 
 void drawUIText(int fontSize, const Vector2 &textPos, const std::string &text,
                 const Color &textColor) {
-  int scaledFontSize = static_cast<int>(fontSize * safeScreenScale);
+  int scaledFontSize = fontSize * safeScreenScale;
+  int textWidth = MeasureText(text.c_str(), scaledFontSize);
+  DrawText(text.c_str(), textPos.x - textWidth / 2.0f, textPos.y,
+           scaledFontSize, textColor);
+}
+
+void drawUITextCentered(int fontSize, const Rectangle &bounds,
+                        const std::string &text, const Color &textColor) {
+  int scaledFontSize = fontSize * safeScreenScale;
   int textWidth = MeasureText(text.c_str(), scaledFontSize);
 
-  DrawText(text.c_str(), static_cast<int>(textPos.x - textWidth / 2.0f),
-           static_cast<int>(textPos.y), scaledFontSize, textColor);
+  Vector2 textPos = {
+      bounds.x + (bounds.width - textWidth) / 2.0f,
+      bounds.y + (bounds.height - scaledFontSize) / 2.0f,
+  };
+  DrawText(text.c_str(), textPos.x, textPos.y, scaledFontSize, textColor);
+}
+
+// ─────────────────────────────────────────────────────
+// InGame UI functions
+// ─────────────────────────────────────────────────────
+
+void drawComponentsPanel(std::vector<std::shared_ptr<MovableObject>> &objects,
+                         std::shared_ptr<MovableObject> &activeObject,
+                         std::vector<Wire> &wires, bool &isPlacingWire,
+                         std::shared_ptr<MovableObject> wireStartObject) {
+  float panelWidth = 450.0f * safeScreenScale;
+  Rectangle panelBounds = {
+      globalSettings.screenWidth - panelWidth,
+      0,
+      panelWidth,
+      static_cast<float>(globalSettings.screenHeight),
+  };
+
+  drawUIPanel(20.0f, panelBounds);
+
+  float margin = 32 * safeScreenScale;
+  float btnSize = 100 * safeScreenScale;
+  float spacing = 20 * safeScreenScale;
+  int columns = 3;
+
+  std::vector<std::string> componentNames = {"Battery", "LED", "Wire"};
+  int totalButtons = componentNames.size();
+
+  float totalGridWidth = columns * btnSize + (columns - 1) * spacing;
+  float startX = panelBounds.x + (panelBounds.width - totalGridWidth) / 2.0f;
+  float startY = panelBounds.y + margin;
+
+  // ───── Component Button Grid ─────
+  for (int i = 0; i < totalButtons; ++i) {
+    int col = i % columns;
+    int row = i / columns;
+
+    Rectangle btnRect = {
+        startX + col * (btnSize + spacing),
+        startY + row * (btnSize + spacing),
+        btnSize,
+        btnSize,
+    };
+
+    drawUIRect(8.0f, btnRect);
+    drawUITextCentered(18, btnRect, componentNames[i], DARKGRAY);
+
+    if (CheckCollisionPointRec(GetMousePosition(), btnRect) &&
+        IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+      const std::string &name = componentNames[i];
+
+      if (name == "Battery") {
+        auto newObj = std::make_shared<Battery>(Vector2{100, 100});
+        newObj->loadObjectTexture();
+        objects.push_back(newObj);
+      } else if (name == "LED") {
+        auto newObj = std::make_shared<Led>(Vector2{100, 100});
+        newObj->loadObjectTexture();
+        objects.push_back(newObj);
+      } else if (name == "Wire") {
+        isPlacingWire = true;
+        wireStartObject = nullptr;
+      }
+    }
+  }
+
+  // ───── ESC to Cancel Wire Mode ─────
+  if (isPlacingWire && IsKeyPressed(KEY_ESCAPE)) {
+    isPlacingWire = false;
+    wireStartObject = nullptr;
+  }
+
+  // ───── Show ESC Hint ─────
+  if (isPlacingWire) {
+    DrawText("Press ESC to cancel wire", panelBounds.x + margin,
+             globalSettings.screenHeight - margin, 20, DARKGRAY);
+  }
+
+  // ───── Divider Line ─────
+  float dividerY = panelBounds.y + panelBounds.height / 2.0f;
+  DrawLineEx(
+      Vector2{panelBounds.x + margin - 5.0f, dividerY},
+      Vector2{panelBounds.x + panelBounds.width - margin + 5.0f, dividerY},
+      5.0f, Color{180, 180, 200, 255});
+
+  // ───── Inspector Section ─────
+  float inspectorStartY = dividerY + margin;
+  float labelFontSize = 28.0f * safeScreenScale;
+  float valueFontSize = 24.0f * safeScreenScale;
+  float lineSpacing = 36.0f * safeScreenScale;
+  float textX = startX;
+
+  if (activeObject) {
+    std::vector<std::string> lines;
+    lines.push_back("Inspector");
+    lines.push_back("Position: (" +
+                    std::to_string((int)activeObject->position.x) + ", " +
+                    std::to_string((int)activeObject->position.y) + ")");
+
+    if (auto battery = std::dynamic_pointer_cast<Battery>(activeObject)) {
+      lines.push_back("Type: Battery");
+      lines.push_back("Volt: 1.5V");
+    } else if (auto led = std::dynamic_pointer_cast<Led>(activeObject)) {
+      lines.push_back("Type: LED");
+      lines.push_back(std::string("State: ") + (led->status ? "ON" : "OFF"));
+    } else {
+      lines.push_back("Type: Unknown");
+    }
+
+    for (size_t i = 0; i < lines.size(); ++i) {
+      DrawText(lines[i].c_str(), textX, inspectorStartY + i * lineSpacing,
+               (i == 0 ? labelFontSize : valueFontSize), DARKGRAY);
+    }
+  }
+  Rectangle resetBtn = {globalSettings.screenWidth - 300.0f,
+                        globalSettings.screenHeight - 100.0f, 160, 40};
+  DrawRectangleRec(resetBtn, RED);
+  DrawText("Reset Level", resetBtn.x + 20, resetBtn.y + 10, 20, WHITE);
+
+  if (CheckCollisionPointRec(GetMousePosition(), resetBtn) &&
+      IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    resetLevel();
+  }
 }
 
 // ─────────────────────────────────────────────────────
 // Input Functions
 // ─────────────────────────────────────────────────────
 bool isUIButtonPressed(const UIButton &button) {
-
   Vector2 inputPos = GetMousePosition();
   bool isHovered = CheckCollisionPointRec(inputPos, button.bounds);
 
@@ -119,16 +229,10 @@ bool isUIButtonPressed(const UIButton &button) {
     isHovered = CheckCollisionPointRec(inputPos, button.bounds);
   }
 
-  if (isHovered && (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
-                    IsGestureDetected(GESTURE_TAP))) {
-    return true;
-  }
-
-  if (button.isfocused && (IsKeyDown(KEY_ENTER) || IsKeyDown(KEY_KP_ENTER))) {
-    return true;
-  }
-
-  return false;
+  return isHovered && (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
+                       IsGestureDetected(GESTURE_TAP)) ||
+         (button.isfocused &&
+          (IsKeyDown(KEY_ENTER) || IsKeyDown(KEY_KP_ENTER)));
 }
 
 void updateKeyboardNavigation(int count, int &focusedButton,

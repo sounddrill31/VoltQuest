@@ -50,9 +50,9 @@ If you're not sure where to start, feel free to drop by and ask.
 
 ## 💬 Community
 
-We hang out in the **Absurdity Central** Discord — a friendly FOSS and hardware space.  
-VoltQuest has its own channel there for discussion, feedback, and updates.
+We have a dedicated **Discord server** to discuss, develop, and contribute to the project.
+If you're interested in contributing, join us there!
 
-[![Join Discord](https://img.shields.io/badge/chat-on%20Discord-7289DA?logo=discord&style=for-the-badge)](https://discord.gg/PWDcKThWt9)
+[![Join Discord](https://img.shields.io/badge/chat-on%20Discord-7289DA?logo=discord\&style=for-the-badge)](https://discord.gg/HVP4kvDVh4)
 
 ---

@@ -22,7 +22,9 @@ Use the following format when adding new entries:
 - `resources/assets/path/to/file.ext` — © <year> `your-name` — CC BY-SA 4.0 
 
 ### Original Asset List
+- `resources/assets/images/battery.png` — © <year> `shadow-foss` — CC BY-SA 4.0 
 
+- `resources/assets/images/LED.png` — © <year> `shadow-foss` — CC BY-SA 4.0 
 
 
 ---
@@ -54,9 +56,6 @@ Use the same format when adding entries:
 
 ### Third-Party Assets
 
-- `resources/assets/images/panel.png` — from [Kenney Assets](https://kenney.nl/assets), licensed under **CC0 (public domain)**
-
-- `resources/assets/images/button.png` — from [Kenney Assets](https://kenney.nl/assets), licensed under **CC0 (public domain)**
 
 If you reuse third-party assets in your contributions, make sure they are under CC0, CC BY, CC BY-SA, MIT, or other permissive licenses, and provide attribution as needed.
 

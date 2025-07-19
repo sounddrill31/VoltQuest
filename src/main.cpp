@@ -1,3 +1,4 @@
+#include "../include/level.hpp"
 #include "../include/screen_manager.hpp"
 #include "../include/settings.hpp"
 #include "../include/ui_manager.hpp"
@@ -8,7 +9,6 @@ int main() {
   createWindow();
   updateLayout();
   loadAllUITextures();
-  calculateScreenScale();
   while (globalSettings.isGameRunning) {
     BeginDrawing();
     drawCurrentScreen();

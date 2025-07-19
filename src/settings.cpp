@@ -63,7 +63,6 @@ void loadSettings() {
       globalSettings.fullscreen = (value == "true" || value == "1");
       overrideDisplaySettings = false;
     }
-    calculateScreenScale();
   }
 }
 

@@ -1,17 +1,13 @@
 #include "../include/screen_manager.hpp"
+#include "../include/level.hpp"
 #include "../include/settings.hpp"
 #include "../include/ui_manager.hpp"
+#include "../include/ui_utils.hpp"
 #include "raylib.h"
 #include <cmath>
-
+#include <iostream>
 enum class SCREEN { START_MENU, OPTIONS_MENU, CHAPTER_MENU, LEVEL_MENU, GAME };
 SCREEN currentScreen = SCREEN::START_MENU;
-
-const float baseWidth = 1920.0f;
-const float baseHeight = 1080.0f;
-float screenScaleX = 1.0f;
-float screenScaleY = 1.0f;
-float safeScreenScale = 1.0f;
 
 namespace startMenu {
 float logoSize;
@@ -110,7 +106,7 @@ void drawCurrentScreen() {
     updateKeyboardNavigation(3, startMenu::focusedButton,
                              startMenu::buttonsArray);
     if (isUIButtonPressed(startMenu::playButton)) {
-      currentScreen = SCREEN::CHAPTER_MENU;
+      currentScreen = SCREEN::GAME;
     } else if (isUIButtonPressed(startMenu::optionsButton)) {
       currentScreen = SCREEN::OPTIONS_MENU;
     } else if (isUIButtonPressed(startMenu::quitButton)) {
@@ -127,6 +123,12 @@ void drawCurrentScreen() {
     break;
   }
 
+  case SCREEN::GAME: {
+    updateLevel();
+    if (IsKeyPressed(KEY_BACKSPACE)) {
+      currentScreen = SCREEN::START_MENU;
+    }
+  }
   default:
     break;
   }
