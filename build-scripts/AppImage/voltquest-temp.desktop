@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=VoltQuest
+Comment=VoltQuest Application (AppImage)
+Exec=voltquest
+Icon=voltquest
+Type=Application
+Categories=Game;
+Terminal=false
+StartupWMClass=VoltQuest
+X-AppImage-Version=1.0.0

@@ -63,4 +63,10 @@ cmake-build-*/
 *.bak
 *.tmp
 
-
+# --- AppImage Packing Workspace, Scripts & Outputs ---
+AppDir
+*.AppImage
+*.AppImage.*
+quick-sharun
+uruntime2appimage
+settings.cfg
