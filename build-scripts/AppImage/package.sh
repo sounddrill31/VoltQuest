@@ -17,7 +17,7 @@ echo "$VERSION" > ~/version
 export ADD_HOOKS="self-updater.bg.hook"
 # The arch package does not have icon lol
 export ICON="https://raw.githubusercontent.com/transmission/transmission/refs/heads/main/icons/hicolor_apps_scalable_transmission.svg" # TODO: Change to actual voltquest icon
-export DESKTOP="./build-scripts/AppImage/voltquest-temp.desktop"
+export DESKTOP="./build-scripts/AppImage/voltquest.desktop"
 export UPINFO="gh-releases-zsync|${GITHUB_REPOSITORY%/*}|${GITHUB_REPOSITORY#*/}|latest|*$ARCH.AppImage.zsync"
 export OUTNAME=VoltQuest-"$VERSION"-anylinux-"$ARCH".AppImage
 
